@@ -1,0 +1,756 @@
+---
+title: "Exploratory Data Analysis"
+author: "Jose Luis Lopez Guevara"
+date: "30/7/2021"
+output:
+  html_document: default
+---
+
+buscar el link en mis repositorios
+
+[Link del código](https://github.com/Jose230600?tab=repositories)
+
+Nota:En el documento puede que se presenten varios errores de ortografía asi como varios caracteres extraÃÂ±os que puedan hacer que se pierda interpretación, por lo cual de ser así­ me disculpo de antemano, ya que no los corrigo debido a mi escacez de tiempo. Gracias.
+
+Otra cosa es que los valores cambiaron desde el momento en que realice el estudio, al momento en uqel opublicque por lo que pueden haber cosas no muy coherentes en cuanto la al explición de las cosas, especialemtne en los datos de la ciclovia, varios valores fueron cambiados de undiad, porl o que puedo estar refiirendome a valores en miles pero los datos realemnte son el decimales ya que se cambio de unidad
+
+# Objetivo 
+
+El objetivo principal de este documento simplemente es **poner en prÃÂÃÂ¡ctica** ciertas funciones que aprendÃÂ­ en el curso de Exploratory Data Analysis dado en Coursera por parte de la universidad John hopkins university.
+
+## Datos a utilizar
+
+Utilizaré un conjunto de datos de la ciclovias de bogota encontrados en formato JSON y que tienen coodenasa, esto para posiblemente realizar un mapa
+
+```{r}
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+
+```{r,cache=TRUE}
+library(jsonlite)
+Archivo <- "https://datosabiertos.bogota.gov.co/dataset/cc17612d-4a90-4760-8933-e4b390658106/resource/f6b74b85-c991-4177-9fc2-a2ca7a22fe22/download/ciclovia.geojson"
+jsonData <- fromJSON(Archivo)
+data <-jsonData[[4]]
+data <- data$properties
+write.csv(data,file="ciclovia.csv")
+head(data)
+```
+el curos comienza hablando de los principios de los grÃÂ¡ficos anÃÂ¡liticos que tratare de tratar a lo largo del proyecto, ademÃÂ¡s de ello se empieza con la mencion de grÃÂ¡ficos unidimensionales y en varias dimensiones, y especialemnte se utiliza el sistema base de R el cual tratare aca incialmente:
+
+## GrÃÂ¡ficos Base de R
+
+El primer tipo de "grÃÂ¡fico" de una dimension en realidad es el resutlado de la funciÃÂ³n summary
+
+```{r}
+summary(data$SHAPE_Length)
+```
+Los datos anteriores ya se pueden ir observando de manera grÃÂ¡fica con un boxplot, el cual el ÃÂºnico dato que no mostrarÃÂ­a serÃÂ­a el promedio
+
+```{r}
+par(bg="light blue",col.axis="white",col.lab="white",col.main="white")
+boxplot(data$SHAPE_Length,xlab="Estadisticas básicas en kilometros",ylab="longitud de rutas",col="dark green")
+abline(h=0.07,col="magenta",lwd=3,lty=2)
+title("Resumen General de longitud de rutas de ciclovia en Bogotá")
+mtext("Fuente: https://datosabiertos.bogota.gov.co/dataset/ciclovia-bogota-d-c-area-urbana",side=1,col="white")
+text(1,0.065,"mas del 25% de las longitudes estan por encima de 7000")
+```
+notece que la funciÃÂ³n `boxplot` permite realizar esta grÃÂ¡fica, y con el paramwetro `xlab` especifico el nombre del eje x,el color con `col` y que despeus posteriormente con la funciÃÂ³n `abline`agrego una lÃÂ­nea de color magenta con ancho `lwd` de 2 y tipo de lÃÂ­nea punteada que corresponde a `lty` de 2, y que con la funciÃÂ³n `title`puedo agregar un titulo.
+
+AdemÃÂ¡s notece que viendo el grÃÂ¡fico mÃÂ¡s del 25% de las rutas tiene una longitud por encima de 7000, veace que esto se ve mas claro al realizar la grÃÂ¡fica de la lÃÂ­nea horizontal junto con el texto haciendo explicito lo que el grÃÂ¡fico muestra, *lo cual es uno de los principios de los grÃÂ¡ficos anÃÂ¡liticos que consiste en integrar varias formas de evidencias de lo que se quire mostrar* ademÃÂ¡s de incluir un texto diciendo esto con la funciÃÂ³n `text`la cual cabe resaltar que en este caso el primer valor corresponde a la coordenada en x a grÃÂ¡ficar el texto y la segunda a la coordenada en y del eje, sin embargo para esta grÃÂ¡fica al ser un boxplot, realmente el eje x no existe, ya que es unidemnsional por ello solo se puede coloar el texto en tal parte.
+
+fijece tambiÃÂ©n que con la funciÃÂ³n `mtext`se agrega texto pero a las margenes, done se especifica el argumento `side` como 1 para esepcificar el texto en la margen de abajo si se desea saber los nuemros apra cada cuadrante consultar `?mtext`, y en este texto coloco la fuente de los datos cumpliendo asi con *otro principio que es incluir en lo posible la documentaciÃÂ³n de los datos y descripciÃÂ³n*, el objetivo es que la persona al ver la grÃÂ¡fica ya le sea explicado todo lo que se muestra del contenido y que le quede claro y no necesite leer alguna documentacion por aparte, lo cual es *otro principio y es que el contenido sea relevante* en lo cual en este caso al ser el objetivo de este proyecto solo la prÃÂ¡ctica de un analisis exploratorio, no traigo algun tema a estudiar realmente porl o que este punto es mas sibjetivo en este proyecto.
+
+Finalmente fijece que mediante la funciÃÂ³n `par` se pueden definir elementos no tanto del bocplot sino mas de la grÃÂ¡fica en general, como el color del fondo de los nombres de los ejes, y de los numeros de los ejes en este caso defino todo blanco y el color del fondo aun azul claro para asi ver algun contraste de colores, para esta funciÃÂ³n tambiÃÂ©n cabe agregar que es se puede consultar como esta definido cualqueir elemento de manera general indicandocelo a la funciÃÂ³n par en comillas como caracter como por ejemplo `par("bg")` y que se puedne consultar todos estos parametros con `names(par())`
+
+
+En el anterior cÃÂ³digo se trataron varios conceptos de los principios analÃÂ­ticos asi como vartias funciones base de R para modificar una grÃÂ¡fica, continuando con los principios uno de ellos es *comparar los datos respecto a algo* y otro es *tener en cuenta variedad de variables*; por ejemplo en el anterior boxplot podemos ver que que esas longutydes estan por encima de 7000 pero esto ÃÂ¿comparado a que?, o ÃÂ¿respecto a que? en este caso no es tan facil comparar esto respecto a algo ya que la longitud como tal no es una medida como la eficacia de algun experemiento o algo asi que se compararÃÂ­a claramente con datos sin la medida para asÃÂ­ saber si esta si hace algun efecto o no, sin emabrgo si la podemos analizar respecto a diferentes variables, haciendo asÃÂ­ uso de grÃÂ¡ficos de mas dimensiones por ejemplo podemos observar estos resumenes estadisticos resepecto la hora en la que se hace la ruta, o el indicativo de la zona.
+
+```{r}
+ data$INDICATIVO <- as.factor(data$INDICATIVO)
+ data$HORARIO <- as.factor(data$HORARIO)
+ par(mfrow=c(2,1))
+ PorHora <- split(data,data$HORARIO)
+ hist(PorHora[[1]]$SHAPE_Length,col="dark red",main="Hora de 6:30 am a 2:00 pm",xlab="Longitud")
+ rug(PorHora[[1]]$SHAPE_Length)
+ text(0.0925,0.6,"No hay rutas de 9000 ")
+ text(0.0925,0.4,"con este horario ")
+ hist(PorHora[[2]]$SHAPE_Length,col="dark red",main="Hora de 7:00 am a 2:00 pm",xlab="longutud")
+ rug(PorHora[[2]]$SHAPE_Length)
+ text(0.03,3,"No hay rutas de 6000 ")
+ text(0.03,2,"con este horario ")
+```
+
+Notece en el cÃÂ³digo anterior que para poder grÃÂ¡ficar en este caso 2 histogramas al mismo tiempo primero realizo la funciÃÂ³n `par` con argumneto `mfrow=c(2,1)` diciendole que quiero 2 filas de grÃÂ¡ficas y 1 columna de grÃÂ¡ficas, y veace que por las descirpciones que hago de los datos en la misma grÃÂ¡fica y que no tengo que hacer en este texto. fijece tambien que se utiliza la funciÃÂ³n `rug()` posterior al uso del histograma, esto para en el eje x especificar la acumulacion de datos en cada parte; cabe reslatar que el correcto uso del histograma relamente es para entender la distribuciÃÂ³n del os datos que en otros proyectos tratarÃÂ©
+
+tambien se puede analizar un boxplot resepcto varias variables 
+
+```{r}
+ par(mfrow=c(1,1)) # otra ves default
+ boxplot(data$SHAPE_Length ~ data$HORARIO,col="dark green")
+```
+notece del diagrama anterior que la mediana de longitud es mas alta para las rutas de 7:00 am a 2:00 pm
+
+El ultimo tipo de grÃÂ¡fico que me falto mencionar para una dimension fue el grÃÂ¡fico de barras
+
+```{r}
+ par(mfrow=c(1,1)) # otra ves default
+ barplot(table(data$HORARIO),col="light yellow",main="cantidad de rutas por tipo de horario")
+```
+EL ultimo grÃÂ¡fico a mencinar es el scatterplot:
+```{r}
+plot(x=data$NO_GUARDIA,y=data$SHAPE_Length,col=data$HORARIO)
+```
+Fiejce en el cÃÂ³digo anterior, la funciÃÂ³n plot realiza directamnte un scatterplot, donde esepcifico la vraible en x y la varaible en y, ademÃÂ¡s al especificar el parÃÂ¡metro `col`puedo agregar un desagregarcion resepecto otra variable
+
+en el siguiente cÃÂ³digo realizo un procedimento que consisten en primero abir la grÃÂ¡fica en blanco y posteriormente ir agregando lo  que deseo
+
+```{r,warning=FALSE}
+plot(x=data$NO_GUARDIA,y=data$SHAPE_Length,type="n") #grÃÂ¡fica en blancio para manterner rangos
+points(x=PorHora[[1]]$NO_GUARDIA,y=PorHora[[1]]$SHAPE_Length,pch=17,col="dark green") #agregar datos de un horario especifico
+points(x=PorHora[[2]]$NO_GUARDIA,y=PorHora[[2]]$SHAPE_Length,pch=16,col="purple")#agregar datos del otro horario
+legend("bottomright",pch=c(17,16),col=c("dark green","purple"),legend=c("Horario desde las 6:30am","horario desde las 7 am"))#leyenda
+lines(loess.smooth(PorHora[[2]]$NO_GUARDIA, PorHora[[2]]$SHAPE_Length),col="pink") # suavizacion de morados
+lines(PorHora[[1]]$NO_GUARDIA, PorHora[[1]]$SHAPE_Length,col="green") # union de puntos verdes
+text(17,0.07,"Calle 26 entre")
+text(17,0.065,"KRA 60 y KRA 7")
+text(17,0.061,"se refiere al verde")# agreando el nombre de la ruta lo hago denmanera manual, pero tambien se podria agregar el valor de la vraible correspondiente y la longitud excacta que le corresponde, no lo hago asi para poder customrizarlo cmo yo quiero, sino se superpodnria sobre algunos puntos
+dev.copy(png,file="sctter.png") # guardando como png, se podria guardar como pdf con dev.copy2pdf()
+dev.off
+```
+
+notece que al final del cÃÂ³digo la grÃÂ¡ficas se puede guardar como archivos por ejemplo un pdf o una imagen png
+
+la ultima grÃÂ¡fica de una dimension que se nombro fue la de densidad para el base syste es :
+
+```{r}
+plot(density(data$SHAPE_Length))
+```
+
+## GrÃÂ¡ficos de lattice
+
+Para esta seccion me gustarÃÂ­a usar otro conjunto de datos con mayor variedad
+
+```{r,cache=TRUE,}
+library(lattice)
+#UrlDelArchivo <- "https://datosabiertos.bogota.gov.co/dataset/9bdf518e-b756-4865-983f-0521111fbcd1/resource/30d65a8b-d0ed-4e95-977e-0d7cc2ea89ef/download/llamadastramitadas-c4-bogota_numerounicodeseguridadyemergencias-nuse_linea-123-20210630.csv"
+#download.file(UrlDelArchivo,destfile = "Lectura1.csv")
+Datos1 <- read.csv("Lectura1.csv",sep=";")
+Datos1 <- Datos1[complete.cases(Datos1),]
+Datos1 <- Datos1[Datos1$CANT_INCIDENTES<=2000,]
+head(Datos1)
+```
+Primero convierto a factores las variables que deseo analizar
+
+```{r}
+library(lattice)
+ Datos1$ANIO <- as.factor(Datos1$ANIO)
+ Datos1$MES <- as.factor(Datos1$MES)
+ Datos1$LOCALIDAD <- as.factor(Datos1$LOCALIDAD)
+ Datos1$TIPO_DETALLE <- as.factor(Datos1$TIPO_DETALLE)
+```
+
+Se puede empezar con un histograma 
+```{r}
+ p <- histogram(~CANT_INCIDENTES,Datos1,xlab="Cantidad de incidentes",main="Histograma de cantidad de insidentes")
+print(p)
+```
+Notece que es muy similar al sistema base, solo que la grÃÂ¡fica se puede guardar como un objeto, lo interesante de este sistema es poder realizar las grÃÂ¡ficas respecto varios factores sin tener que usar grÃÂ¡ficas seperadas con `par(mfrow=c())`; fijece ademÃÂ¡s que se especifica el caracter `~`ya qeu lattice espera una formula, seguido de el conjuto de datos, si embargo tambien se hubiece podido pasar el vector Datos1$CANT_INCIDENTES directamente
+
+```{r}
+histogram(~CANT_INCIDENTES | ANIO ,Datos1,xlab="Cantidad de incidentes",main="Histograma de cantidad de insidentes",sub="Por aÃÂ±o")
+```
+Fijece como las dsitribuciones para cada aÃÂ±o son muy similares, si se agrega el parametro `layout` podemos especificar como queremos el resultado de las grÃÂ¡ficas.
+
+Cabe resaltar tambiÃÂ±en que si no se hubiece especificado la varible de aÃÂ±os como factor, entonces no habria titulos para cada panel
+
+```{r}
+histogram(~CANT_INCIDENTES | MES ,Datos1,layout=c(4,3),xlab="Cantidad de incidentes",main="Histograma de cantidad de insidentes")
+```
+
+Ahora para poder agregar cosas como en el base, lattice espera que todo se haga en solo una lÃÂ­nea de comando, por ello es necesario definir una funciÃÂ³n dentro de la grÃÂ¡fica
+
+```{r,cache=TRUE}
+xyplot(CANT_INCIDENTES ~ MES | ANIO, Datos1, panel=function(x,y,...){
+                                                        panel.xyplot(x,y,...)
+                                                        panel.abline(h=600,col="dark green")
+                                                        panel.text(12,700,"700")
+                                                        })
+```
+fijece como especifico que para todo se haga una lÃÂ­nea en el valor de 600 para asi observar que para los dos aÃÂ±os en que meses la cantidad de incidentes peude ser menor, hay que tener en cuenta que lo que se ponga en la funciÃÂ³n panel  se hara para **todos** los paneles lo cual por ejemplo en el priemr panel ese texto no cuadra muy bien asi que tener en cuenta eso, lo otro a resaltar es que se puede hacer algo respectivo para cada valor del eje y del panel para ello hacer algun calculo que tome como argumento y y agregarlo, o regresionesl iensales y cosas asi.
+
+TambiÃÂ©n se observa que esta grÃÂ¡fica no es muy clara, cuando ello pasa es porque de cierta forma queremos grÃÂ¡ficar los puntos de manera dispersa pero no necesariamente respecto a otra variable para ello se pueden graficar respecto un id del punto 
+
+```{r}
+xyplot(CANT_INCIDENTES ~ 1:102513 | ANIO, Datos1,groups = MES, panel=function(x,y,...){
+                                                        panel.xyplot(x,y,...)
+                                                        panel.abline(h=600,col="dark green")
+                                                        })
+```
+fijece la grÃÂ¡fica naterior como ahora si se ven todos los puntos grÃÂ¡ficados, aca no es de itneres el eje x lo que es de interes es itnentar observar algun patron de agrupamiento podemos ver pro ejemplo que para el mes 1 en el aÃÂ±o 2015 al aprecer ha menos casos que el en el 2016.
+
+Otra funciÃÂ³n de lattice son los diagramas de cajas y bigotes
+
+```{r}
+bwplot(~CANT_INCIDENTES | ANIO ,Datos1,xlab="Cantidad de incidentes",main="cajas y bigotes de cantidad de insidentes",sub="Por aÃÂ±o")
+```
+
+si se observa la grÃÂ¡fica anterior no es muy claro, generalmente en estos casos se recomienda trabaja con el logaritmo de los datos
+
+```{r}
+bwplot(~log10(CANT_INCIDENTES) | ANIO ,Datos1,xlab="Cantidad de incidentes",main="logaritmo de Caja y bigotes de cantidad de incidentes",sub="Por aÃÂ±o" ,panel=function(x,y,...){
+                                                        panel.bwplot(x,y,...)
+                                                        panel.abline(v=1,col="dark green")
+                                                        panel.text(1.3,1.5,"log1")
+                                                        })
+```
+
+De la grÃÂ¡fica anterior se observa que al parecer la medaina de casos fue mayor en 2016 que en 2015 **al parecer**
+
+## GGplot2
+la priemra funciÃÂ³n que funciona similar a `plot ` dfel sistema base es `qplot`
+
+```{r}
+library(ggplot2)
+Datossin <-Datos1
+Datossin$ANIO <-as.factor(Datossin$ANIO)
+DatoMaximo <- Datossin[Datossin$CANT_INCIDENTES>=1970,] 
+qplot(CANT_INCIDENTES,MES,data =Datossin,color=LOCALIDAD,shape=ANIO) + labs(x="Cantidad de incidentes",y="numero del mes",title="Cantidad de llamadas por cada mes en cada año")+geom_text(data=DatoMaximo ,mapping=aes(label=TIPO_DETALLE),vjust = "inward", hjust = "inward") 
+```
+Notece en la funciÃÂ³n anterior un uso similar a plot,y fijece que noe s necesario agregar legenda ya que automÃÂ¡ticamente qplot lo hace,lo unico que especifico es agregar el texto que reviso antes, especificandole parametros para su visualizaciÃÂ³n cabe resaltar que el texto qeu agrego es de un subconjunto que solo trae ek dato que quiero resaltar ya qeu si no especifico datos o especifico el mismo data set el pondira texto a todos los puntos y no seria nada entendible
+
+Cabe resaltar que aca se puede aplicar una recomendaciÃÂ³n de los scatterplots, la cual es que si no es muy claro lo que se ve separar por facetas:
+
+```{r,cache=TRUE}
+DatoMaximo2016 <- Datos1[Datos1$CANT_INCIDENTES>=1970 & Datos1$ANIO==2016,]
+maximos <- rbind(DatoMaximo2016,DatoMaximo)
+qplot(MES,CANT_INCIDENTES,data =Datos1,color=LOCALIDAD,facets = .~ANIO)+geom_text(data=maximos ,mapping=aes(label=TIPO_DETALLE),vjust = "inward", hjust = "inward") + labs(x="Cantidad de incidentes",y="numero del mes",title="Cantidad de llamadas por cada mes en cada aÃÂ±o")
+```
+fijece que se agrega el atributo `facet` lo seÃÂ rp por aÃÂ±o y agrego labels para los mÃÂ¡ximos,fijece como los registros con mayor cantidad de llamdas parecen corresponder a la localidad de Suba, y serÃÂ­a interesante plantear si por algun tipo de orientaciÃÂ³n es mas peligrosa la ciudad.
+
+
+Fijece como los histogramas se pueden grÃÂ¡ficar tambiÃÂ©n respecto alguna medida especifica
+```{r}
+qplot(CANT_INCIDENTES,data=Datossin,fill=ANIO)
+```
+
+
+En ves de utilizar `qplot()`tambiÃÂ©n se puede utilizar `ggplot()`que funcion con solo la agregaciÃÂ³n
+
+```{r,cache=TRUE,warning=FALSE}
+library(dplyr)
+ordenacion <- Datos1%>%
+        select(CANT_INCIDENTES,TIPO_DETALLE,ANIO,MES,LOCALIDAD)%>%
+        group_by(TIPO_DETALLE)%>%
+        mutate(MinimaCantidad = min(CANT_INCIDENTES),
+               MaximaCantidad = max(CANT_INCIDENTES),
+               CantidadPromedio = mean(CANT_INCIDENTES))%>%
+        arrange(CantidadPromedio)%>%
+        ungroup()%>%
+        mutate(TIPO_DETALLE = factor(TIPO_DETALLE, levels = unique(TIPO_DETALLE)))
+
+
+ comparacion_general <- ggplot(ordenacion,aes(x = CANT_INCIDENTES, y = TIPO_DETALLE))+
+        geom_segment(aes(x = MinimaCantidad, xend = MaximaCantidad, yend = TIPO_DETALLE))+
+        geom_point()+geom_point(aes(x = CantidadPromedio),color="red") +
+        theme_minimal() +
+        ylab("") + geom_vline(xintercept=1000,color="dark green")
+
+  comparacion_detallada <- ggplot(ordenacion,aes(x = CANT_INCIDENTES, y = TIPO_DETALLE))+
+        geom_segment(aes(x = MinimaCantidad, xend = MaximaCantidad, yend = TIPO_DETALLE))+
+        geom_point(aes(color=LOCALIDAD))+geom_point(aes(x = CantidadPromedio),pch=4,size=2) +
+        theme_minimal() +
+        ylab("") +facet_grid(.~ANIO) + geom_vline(xintercept=1000)
+  
+  comparacion_general
+  dev.copy2pdf()
+  comparacion_detallada 
+  dev.copy2pdf()
+
+geom_vline(xintercept=1000,color="dark green")
+```
+
+en el cÃÂ³digo anterior observece como es necesario agregar `geom_point()` para poder agregar y ver los puntos en la grÃÂ¡fica,en cuanto al objeto de ordenaciÃÂ³n lo realizo para que me muestre cuales tipos de atencion son los que mas cantidad de inceidentes tienen, posteriormente realizo dos graficas que guardo a pdf para que se peudan observar mejor, y en las dos se realiza el mismo procedimiento solo que en la grafica segunda, el color de los puntos es respecto a la localidad y se realizan dos grÃÂ¡ficas una para cada aÃÂ±o 
+
+
+Cabe resaltar las funciones `geom_segment` que crea eas lineas que unen de cierta foram los datos usando el valor minimo y maximo de cada tipo de atencion ademÃÂ¡s notece como solo se especifica los puntos en x para el promedio en el segundo `geom_point()`y finalmente la funciÃÂ³n `geom_vline`para agregar una linea horizontal.
+
+### Algo de maspas con ggplot
+
+
+siempre que tengamos las coordendas de un mapa podremos graficarlas en cualqeuir sistema.y mediante la funciÃÂ³n `map_data` con el argumento `world`se acceede al data set de coordendas de todos los paises y asi extraer los de colombia
+
+
+```{r}
+mapa_mundo <- map_data("world")
+colombia <-mapa_mundo[mapa_mundo$region=="Colombia",]
+
+ggplot(colombia,aes(x = long, y = lat,group=group)) +
+geom_point()+geom_path() +geom_polygon(fill = "lightblue", color = "black")+ theme_void()# mapa colombia la funcon geom_path une los puntos
+
+```
+
+## Hierarchical Clustering
+
+el curso continua con la aplicaciÃÂ³n de la tÃÂ©cnica de *Hierarchical Clustering* diciendo que se recomienda su uso para la exploraciÃÂ³n de los datos revisando si existe algun patron entre los datos, y especialmente alguina relacion entre las variables u observaciones, sin embargo es un analisis muy sensible que peude cambiar muy facilmente, y una ves hayan sido identificados a muy grandes rasgos algunos patrones, profundizar en estos con otras herramientas mas sofisticadas
+
+para la aplicaciÃÂ³n del mÃÂ©todo este principlamnete necesita:  
+
+-un tipo de distancia para medir entre los puntos, la general que utiliza es la distancia euclidiana  
+-un mÃÂ©todo de uniÃÂ³n de puntos el default es la distancia entre el punto mas lejano de cada grupo  
+
+Funcionamiento del mÃÂ©todo:  
+
+En el curso se explica a detalle como se va construyendo el arbol, donde bÃÂ¡sicamente este consiste en priemro es calcular las distancias entre los puntos lo cual se puede hacer meidante la funciÃÂ³n `dist`una ves identificadas las distancias, buscar aquella mas pequeÃÂ±a entre dos puntos, y tales puntos agruparlos, despues volver a calcular la distancia pero ahora al punto que se agrupo se puede realizar mediante dos mÃÂ©todos tomando la distancia entre cada punto y el punto mas lejano del grupo agrupado ÃÂ³ sacar el centroide del grupo agrupado y sacar la distancia a este centro; posteriormente al calculo de esas distancias volver a agrupar los puntos con menor distancia entre ellos  y repetir hasta terminar de agrupar puntos.
+
+en el curso se realizan estos pasos para que uno aprenda, donde primero se saca la funciÃÂ³n `dist` para saber la distancia entre los putnos, despues con la funciÃÂ³n `which` se sacan los indices que tengan la `min`distancia, despues se aplica la funciÃÂ³n `hclust` y `as.dendrogram` para extraer cada rama que en cada paso se va agrupando aca aplicare directamente el arbol a la funciÃÂ³n `dist` de algun conjunto de datos
+
+utilizarÃÂ© el primer conjunto de datos de la cilovia
+
+```{r}
+estudio <- data[,c("NO_GUARDIANES","SHAPE_Length")]
+distancias <- dist(estudio)
+distancias
+```
+notece como la distancia entre el punto 10 y 3 se observa como la mas pequeÃÂ±a a simple vista
+
+```{r}
+hcluster <- hclust(distancias)
+hcluster
+```
+notece como dice que utilizÃÂ³ ka distancia euclidiana, y el mÃÂ©todo complete que es el de las distancias al punto mas lejano
+
+```{r}
+plot(hcluster)
+```
+fijece como efectivamente en una de las ramas mÃÂ¡s pequeÃÂ±as agrupo el punto 3 con el 10; para poder identificar a que registro corresponde la agrupaciÃÂ³n es conveniente grÃÂ¡ficar un scatterplot entre las dos variables
+
+```{r}
+with(estudio,plot(x=NO_GUARDIANES,y=SHAPE_Length))
+with(estudio,text(NO_GUARDIANES + 0.1, SHAPE_Length + 0.0012, labels = as.character(1:14)))
+```
+notece como engaÃÂ³samente pareciera que estuviece mal el algoritmo uniendo 3 con 10 cuando realmente *parecen* muy lejandos, donde realmente lo que sucede es que si recordamos la distancia euclidiana, esta toma en cuenta la coordenada en x y en y, donde si vemos la distancia entre el punto 10 y el 6 pareciera muy cercana sin embargo si miramos sus magnitudes en el eje y en esta hay una distancia de aproximadamente 200 unidades, asi en el eje x sea de 0, ya que si comparamos respecto el punto 3, la distancia en y es de apenas 10 unidades asi en 3 parezca mayor, ya que realmente en x son solo 3 unidades realmente, osea, si se grÃÂ¡ficara el eje x con las mimas uniadades del eje y la agrupacion se veria mas clara, sin embargo dada la cercania realmente no se alcanzarÃÂ­a a observar bien los puntos
+
+ahora, para poder colorear los clusters, en este mÃÂ©todo es necesario que nosotros primero definamos cuantos clusters deseamos,para ello es mas conveniente grÃÂ¡ficar el arbol de manera que las ramÃÂ¡s todas se estiren completamente
+
+```{r}
+hcluster2 <- as.dendrogram(hcluster)
+plot(hcluster2)
+abline(h=3,col="dark green")
+text(14,3.3,"3 clusters")
+abline(h=0.5,col="purple")
+text(15,1,"6 clusters")
+```
+fijece como la funciÃÂ³n `as.dendrogram` permite extender las ramas
+fijece como dependiendo de en donde realicemos el *"corte"* en el eje y la cantidad de clusters se van generando podemos ver que si decidimos mirar cuantos grupos se generan a una distancia euclidiana de 3000 metros *(no la distnacia de las rutas en la vida real, ya que esta distanca la sacamos con el numero de guardia que realemnte no es muy lÃÂ³gico fue solo apra ejemplificar lo enseÃÂ±ado)* se generarÃÂ­an 3 grupos y a una distancia de 1000 5 grupos
+
+```{r}
+with(estudio,plot(x=NO_GUARDIANES,y=SHAPE_Length,main="3 clusters"))
+with(estudio,text(NO_GUARDIANES + 0.15, SHAPE_Length + 0.0012, labels = as.character(1:14)))
+points(estudio[c(8,15),],col="red",pch=5)
+points(estudio[c(3,11,5,14),],col="blue",pch=25)
+points(estudio[c(1,4,2,7,9,13,12,6,10),],col="green",pch=24)
+```
+fijece como a una distancia euclidiana de 3000 salen estos tres grupos lo cual nos va dando la idea de que las rutas con distnacia de entre 9000 y numero de guardia mayor a 17 guardan cierta relaciÃÂ³n *si en este caso se supiera bien a que se refiere no_guardia* lo cual empieza a generar hipotesis o ideas, donde se me ocurre que a las rutas de mayor longitud les asignan un guardia mayor o algo asi depronto si esto se refiere a que con mas numero de guardia mas experiencia o rango o algo asi.
+
+```{r}
+with(estudio,plot(x=NO_GUARDIANES,y=SHAPE_Length,main="6 clusters"))
+with(estudio,text(NO_GUARDIANES + 0.15, SHAPE_Length + 0.0012, labels = as.character(1:14)))
+points(estudio[c(8,15),],col="red",pch=5)
+points(estudio[3,],col="blue",pch=25)
+points(estudio[c(11,5,14),],col="green",pch=24)
+points(estudio[c(1,4),],col="orange",pch=19)
+points(estudio[c(2,7,9,13),],col="light blue",pch=16)
+points(estudio[c(12,6,10),],col="light green",pch=13)
+```
+fijece como ahora con 6 clusters se puede apoyar la idea con el grupo naranja viendo que a otros guardias de "mayor nivel" segun yo, les dan de mayor longitud las rutas en comapracion a los de color azul claro, sin embargo para los grupos de color verde y azul ya no es tan claro
+
+
+### mapa de calor
+
+el mapa de color se realiza con la funciÃÂ³n `heatmap`y bÃÂ¡sicmanete su idea es mostrarnos la matriz de manera visual pero con sus casillas coloreadas de manera que podamos identificar alguna relacion entre las filas o las columnas
+
+```{r}
+estudio$NO_GUARDIANES <- as.numeric(estudio$NO_GUARDIANES)
+names(estudio) <- c("Guar","Len")
+calor <- as.matrix(estudio)
+heatmap(calor)
+```
+fijece la grÃÂ¡fica anterior, donde la columna derecha tiene un color muchisimo mas oscuro que el de la columna izqueirda, esto calramente porque los valores de la columna derecha son muchisimo mas grandes que los de la izquierda, ademÃÂ¡s fijece como realiza el arbol a la izquierda y deacuerdo a ese resultado reordena las filas observandoce a la derecha
+
+
+Lo último que me gustaría resaltar del hclust esque el curo se provee una función que no muetra el nombre de los puntos en el arbol, sino el nombre del grupo y su color si uno le especifica
+
+```{r}
+source("myplclust.R")
+secuenciaColor3clusters <- c(3,3,2,3,2,3,3,1,3,3,2,3,3,2,1)
+grupos <- c(3,3,2,3,2,3,3,1,3,3,2,3,3,2,1)
+myplclust(hcluster,lab.col=secuenciaColor3clusters,lab = grupos)
+```
+
+
+
+
+## K-means Clustering
+
+el k-means clustering es otra tÃÂ©cnica para agrupar, bastante conocida, para esta se requiere primero de la difiniciÃÂ³n propia de cuantos clusters se cree que hay dentro de los datos, esto se puede determinar, al azar o por infomracion o teorÃÂ­a que tengamos por ejemplo decir que en teorÃÂ­a se sabe que hay 3 grandes grupos de rutas de ciclovia en BogotÃÂ¡ o algo asi.
+
+el mÃÂ©todo consiste en agrupar a los centros elejidos al azar, los puntos mas cercanos, para esto se debe sacar la distancia entre cada punto y cada centro elejido al azar, y asignar el punto al centro con menor distancia, una ves teniendo uns grupos iniciales se saca el centroide o promedio de distancias entre estos puntos cambiando asi el centro del grupo, despues se repite y se veulve a mirar las distnacias a estos nuevos centros y asÃÂ­ se repite por iteraciones hasta que se estabilizan los puntos y ya no se agregan nuevos puntos a los nuevos centros.
+
+para aplicarlo se utiliza la funciÃÂ³n `kmeans`
+
+```{r}
+estudio <- data[,c("NO_GUARDIANES","SHAPE_Length")]
+kmeansObj <- kmeans(estudio, centers = 3)
+kmeansObj
+```
+
+notece como el resultado nos indica los promedios de los grupos donde ubico los puntos al definirle 3 centros, y como el vector nos dice que puntos asigno a cada centro, por ejemplo el primer punto lo asigno al primer grupo, el segundo punto lo asigno al tercer grupo y asi
+
+```{r}
+with(estudio,plot(x=NO_GUARDIANES,y=SHAPE_Length,col=kmeansObj$cluster,pch=19,main="K means 3 clusters"))
+with(estudio,text(NO_GUARDIANES + 0.15, SHAPE_Length + 1, labels = as.character(1:14)))
+points(kmeansObj$centers,pch=3,col=c(1,2,3),cex=3)
+```
+notece como la grupacion de 3 clusters concuerda con el resultado de el anterior mÃÂ©todo
+
+```{r}
+kmeansObj <- kmeans(estudio, centers = 5)
+with(estudio,plot(x=NO_GUARDIANES,y=SHAPE_Length,col=kmeansObj$cluster,pch=19, main="K means 5 clusters"))
+with(estudio,text(NO_GUARDIANES + 0.15, SHAPE_Length + 1, labels = as.character(1:14)))
+points(kmeansObj$centers,pch=3,col=c(1,2,3,4,5),cex=3)
+```
+
+notece como tambien coincide con los 5 clusters
+
+### funciÃÂ³n image 
+
+con la funciÃÂ³n `image`se puede realizar una mapa de calor, sin embargo este solo colorea las casilas de la matriz y ya, no realiza ninguna ordancion como el heatmap, la uso para grÃÂ¡ficar los datos originales y depseus los datos ordenados con k means
+
+```{r}
+par(mfrow = c(1, 2))
+image(t(estudio)[, nrow(estudio):1], yaxt = "n", main = "Original Data")
+image(t(estudio)[, order(kmeansObj$cluster)], yaxt = "n", main = "Clustered Data")
+```
+notece como en los calores de la derecha de manera ordenada podemos ver que en las 4 primeras filas de la columna derecha podria haber un grupo, en las siguientes 4 un grupo y asi, esto lo que nos indica es que si miramos los datos de nuestra matriz, esos datos se realcionan de laguna forma tendran algun patron, son similares cosaso asi
+
+## reduccion de la dimensionalidad
+
+
+Para la reduccion del a dimensionalidad se pude utilizar una matriz de datos donde para esta cabe resaltar que los datos tienen que ser todos del mismo tipo, fijece que en l parte anterior convertir del tipo entero a numerico del data frame *estudio* para asi si poder pasarlo a matriz y que todo tuviera la misma clase
+
+A estas matrices de datos se les puede aplicar las tÃÂ©cnicas de reducciÃÂ³n de la dimensionalidad donde las filas representen alguna observacion y las columnas alguna variable.
+
+Los objetivos de la reduccion del dimensionalidad son 2:  
+
+-De tipo estadistico: obtener conjuntos de variables que no estan relacionadas y explican la mayor varainza posible   
+-De comprension de datos: crear la mejor matriz con menos varaibles que explique los datos originales  
+
+En el curso, se simula la situaciÃÂ³n para explicar el concepto, donde se simulan datos normales, se grafica su iamgen de calor y no se observa ningÃÂºn patron,despues se agrega un patron se ordenan los datos y se grÃÂ¡fican los promedios de las columnas que era el patron que se asigno, simulando asi que solo los promedios de cierta forma podian explicar el patron de los datos al ser estos modificados a proposito.
+
+En la vida real no sabemos el patron de los datos por lo que para poder llegar a la conclusion de que vectores pueden mostrar la varianza de los datos se aplica las tÃÂ©cnias **SVD** y **PCA** las cuales son parecidas en que los componentes principales o PCA son los mismos primeros vectores derechos que se obtienen del SVD si este fue escalado, cabe resaltar que esto de los vecotores derechos se refiere a que este analisis SVD lo que hace es que divide la matriz original de datos en 3 submatrices, la diagonal, y una cantidad de vectores izuqierdos y derechos, donde el producto entre estos vecotres hace que se vuelva a obtener los datos originales, por ello la idea es tomar los vectores que representen mucha varaibildad de los datos sin tener que tomar todos obteniedno asi datos reducidos pero con la misma escencia.
+
+para el desarrollo anterior buscarÃÂ© otro conjunto de datos con mayor cantidad de variables cuantitativas a estudiar 
+
+```{r,cache=TRUE}
+#archivo2 <- "https://datosabiertos.bogota.gov.co/dataset/45d44203-4b5b-4464-9b13-d5d1e5f2a193/resource/d892fe18-de39-483d-8aad-8b38001510fe/download/15.-cumplimiento-impuesto-predial-2007-2018.txt"
+#download.file(archivo2,destfile = "predial.txt")
+Datos2 <-read.table("predial.txt",sep=",",header = TRUE)
+head(Datos2)
+```
+
+lo priemro que hago es quedarme con las variables que puedo volver numericas
+
+```{r}
+Datos2 <- Datos2[1:10000,-c(1,3,5,6)]
+head(Datos2)
+sis <- sapply(Datos2,function(x){x <- as.numeric(x)})
+knnn <- sapply(Datos2,function(x){x <- as.numeric(x)})
+sin  <- sis [,-c(13)]
+par(mfrow = c(1, 2))
+image(t(sis)[, nrow(sis):1], yaxt = "n", main = "todas las columnas")
+image(t(sin)[, nrow(sin):1], yaxt = "n", main = "Sin la ultima columna")
+```
+en las grÃÂ¡ficas anteriroes miramos que casi todos los valores son muy claros esto por se valores muy pequeÃÂ±os sin emabrgo al quitar el valorde la ultima columna se ven mas colores esto por mas vaiedad en los datos
+
+```{r,cache=TRUE}
+
+sum(is.na(sis))
+sum(is.na(sin))
+
+sis <- sis[complete.cases(sis),]
+
+Hclusterizacion <- hclust(dist(sis))  
+dataMatrixOrdered <- sis[Hclusterizacion$order, ]
+Hclusterizacion2 <- hclust(dist(sin))  
+dataMatrixOrdered2 <- sin[Hclusterizacion2$order, ]
+par(mfrow = c(1, 2))
+image(t(dataMatrixOrdered)[, nrow(dataMatrixOrdered):1], yaxt = "n", main = "todas las columnas")
+image(t(dataMatrixOrdered2)[, nrow(dataMatrixOrdered2):1], yaxt = "n", main = "Sin la ultima columna")
+```
+notece como se ordenaron los datos ahora miraremos si tal patron lo logramos explicar reduciendo la matriz.
+
+Importante eliminar los valores NA apara poder realizar la aplicacion de svd
+
+```{r}
+svd1 <- svd(scale(dataMatrixOrdered))
+svd2 <- svd(scale(dataMatrixOrdered2))
+str(svd1)
+```
+
+si observamos la descripcion de svd1 cemos que contiene el valor de la diagonal y diferentes vectores de tipo v o d
+
+```{r}
+par(mfrow=c(1,3))
+image(t(dataMatrixOrdered)[, nrow(dataMatrixOrdered):1], yaxt = "n", main = "todas las columnas")
+plot(svd1$u[,1], dim(sis)[1]:1, ylab = "Fila", xlab = "Primer vector singular izquierdo", pch = 19)
+plot(svd1$v[,1], xlab = "Columna", ylab = "Primer vector singular Derecho", pch = 19)
+dev.copy2pdf()
+```
+
+Fijece en la belleza de arriba como el vector principal izquierdo mustra esa aglomeracion de datos abajo indicando el unico patron que la matriz muestra, y tambien como el vector principal derecho no es muy clara su representacion pero apoya al primer vector esepialmente en los valores de la derecha de abajo
+
+Si hablamos en tÃÂ©rminos de los datos, podriamos darnos cuenta con esta exploraciÃÂ³n que en la ÃÂºltima columna que era el total pagado podemos ver que  especialmente hay un patron de unos registros que tienen valores realmente altos respecto a los demÃÂ¡s datos, por lo que si deseamos reducir los datos originales a una matriz mas pequeÃÂ±a sin duda tenemos que tener en cuenta que esta caracteristica nuestros nuevos datos deben preservarla
+
+Fijece tambiÃÂ©n que en el cÃÂ³digo para la primera grÃÂ¡fica se espcifica el numero de filas del data set 
+
+Ahora para poder reducir nuestra matriz con estos vectores primero es necesario revisar cuanta variacion explican los componentes para decidir si la reducimos con solo los primeros vectores o necesitamos mas, para ello utilizamos la diagonal obtenida
+
+```{r}
+par(mfrow=c(1,3))
+image(t(dataMatrixOrdered)[, nrow(dataMatrixOrdered):1], yaxt = "n", main = "todas las columnas")
+plot(svd1$d, xlab = "Columna", ylab = "Valor singular", pch = 19)
+plot(((((svd1$d)^2))/sum(((svd1$d)^2))), xlab = "Valor singular", ylab = "Varianza explicada", pch = 19)
+```
+de las grÃÂ¡ficas anteriores lo que observamos es que el primer componente explica alrededor de un 37% de la informacion, el segundo un 12% y asi sucesivamente, donde **asi hayan 13 dimensiones se puede explicar el 38% de la variaciÃÂ³n con solo 1 dimension**
+
+```{r}
+par(mfrow = c(1, 2))
+approx1 <- svd1$u[, 1] %*% t(svd1$v[, 1]) * svd1$d[1]
+image(t(approx1)[, nrow(approx1):1], main = "1 vector")
+image(t(dataMatrixOrdered)[, nrow(dataMatrixOrdered):1], yaxt = "n", main = "todas las columnas")
+```
+fijece como la aproximaciÃÂ³n con el componente principal realiza la agrupacion en los valores de arriba y abajo
+
+Para el segundo dataset:
+
+```{r}
+par(mfrow=c(1,3))
+image(t(dataMatrixOrdered2)[, nrow(dataMatrixOrdered2):1], yaxt = "n", main = "sin la ultima columna")
+plot(svd2$u[, 1], dim(sin)[1]:1, ylab = "Fila", xlab = "Primer vector singular izquierdo", pch = 19)
+plot(svd2$v[, 1], xlab = "Columna", ylab = "Primer vector singular Derecho", pch = 19)
+dev.copy2pdf()
+```
+
+Fijece como este patron es muy similar, solo que un poco menos recargado en lso extremos de arriba y abajo ya que los datos no se concentran en slo una columna sino en 3 mas, igualemnte el vector derecho se concentra en la parte de abajo
+
+
+```{r}
+par(mfrow=c(1,3))
+image(t(dataMatrixOrdered2)[, nrow(dataMatrixOrdered2):1], yaxt = "n", main = "sin la ultima")
+plot(svd2$d, xlab = "Columna", ylab = "Valor singular", pch = 19)
+plot(((((svd2$d)^2))/sum(((svd2$d)^2))), xlab = "Valor singular", ylab = "Varianza explicada", pch = 19)
+```
+Observece bÃÂ¡sicamente las mismas conclusiones 
+
+```{r}
+par(mfrow = c(1, 2))
+approx1de2 <- svd2$u[, 1] %*% t(svd2$v[, 1]) * svd2$d[1]
+image(t(approx1de2)[, nrow(approx1de2):1], main = "1 vector")
+image(t(dataMatrixOrdered2)[, nrow(dataMatrixOrdered2):1], yaxt = "n", main = "sin la ultima")
+```
+igualmente
+
+###comaparacion a PCA
+
+bÃÂ¡sicamente lo unico a resaltar es lo planteado en lo mencionado sobre la similitud de los dos metodos
+
+```{r}
+pca2 <- prcomp(dataMatrixOrdered2, scale = TRUE)
+plot(pca2$rotation[, 1], svd2$v[, 1], pch = 19, xlab = "Principal Component 1", ylab = "Right Singular V\
+ector 1")
+abline(c(0, 1))
+
+```
+
+se ve que los valores del PCA son iguales a los del primer vector singular derecho del SVD
+
+
+### matriz con menos dimensiones
+
+acnlaracion de la matriz con menos dimensiones, cabe resaltar que las grÃÂ¡ficas de calro de las matrices obtenidas de manera aproximada muestran una dimension igual a la de los datos originales esto porque claramente el vector izquierdo tiene una longitud del numero de filas de la matriz original y el vector derecho una longitud del numero de columnas, por lo que si se realiza la aproximacion se obtiene una matriz que seberia ser similar a la original.
+
+la matriz que se obtiene de menor dimension es la **suma** entre la cantidad de componentes de cada vector, por ejemplo para la priemr grÃÂ¡fica analizada los datos originales tenÃÂ­an 14607 filas por 13 columnas lo cual corresponde a 189891 datos, donde si sumamos estas longitudes que corresponderia a los datos con los que nos quedamos de los primeros vectores da 14620 valores lo cual quiere decir que reducimos la informaciÃÂ³n en un 92.3% aproximadamente diciedno que estos 14620 valores que corresponden a una sola dimension pueden explciar el 38% de la informacion reduceindo asi el resto de dimenciones
+
+```{r}
+par(mfrow=c(1,2))
+MtrizApprox <- with(svd1, outer(u[, 1], v[, 1]))
+image(t(dataMatrixOrdered)[, nrow(dataMatrixOrdered):1], yaxt = "n", main = "Original datos todas las columnas")
+image(t(MtrizApprox)[, nrow(MtrizApprox):1], main = "1 vector")
+```
+
+### Knn para tratar NAs
+
+```{r}
+#install.packages("BiocManager")
+#library(BiocManager)
+#BiocManager::install("impute")
+library("impute")
+sisConknn <- impute.knn(knnn)$data
+
+Hclusterizacion3 <- hclust(dist(sisConknn ))  
+dataMatrixOrdered3 <- sisConknn[Hclusterizacion3$order, ]
+
+
+svd3 <- svd(scale(sisConknn))
+
+par(mfrow=c(1,3))
+image(t(dataMatrixOrdered3)[, nrow(dataMatrixOrdered3):1], yaxt = "n", main = "todas las columnas")
+plot(svd3$u[, 1], dim(sin)[1]:1, ylab = "Fila", xlab = "Primer vector singular izquierdo", pch = 19)
+plot(svd3$v[, 1], xlab = "Columna", ylab = "Primer vector singular Derecho", pch = 19)
+
+```
+
+fijece como cambia el patron al no eliminar los NAs como antes realice, lo hice asi dado que no tiene mucho sentido que se mire el total pagado si realmente no se tiene, y no se sabe si seran de las mismas condiciones que el valor inmediantamente siguiente como hace el Knn sin embargo interesante analizarlo como si lo fuera
+
+```{r}
+image(t(dataMatrixOrdered)[, nrow(dataMatrixOrdered):1], yaxt = "n", main = "todas las columnas")
+plot(svd1$d, xlab = "Columna", ylab = "Valor singular", pch = 19)
+plot(((((svd1$d)^2))/sum(((svd1$d)^2))), xlab = "Valor singular", ylab = "Varianza explicada", pch = 19)
+```
+el mismo analisis de antes
+```{r}
+par(mfrow = c(1, 2))
+approxknn <- svd3$u[, 1] %*% t(svd3$v[, 1]) * svd3$d[1]
+image(t(approxknn)[, nrow(approxknn):1], main = "1 vector")
+image(t(dataMatrixOrdered3)[, nrow(dataMatrixOrdered3):1], yaxt = "n", main = "todas las columnas")
+```
+
+Fiejce sin embargo como la imputaciÃÂ³n del vecino mas cercano no sirve realmente, ya que como preciso este valor es el mas sensible al ser el total pagado de una magnitud demasiado alta en comapraciÃÂ³n a los demas valores, ps al rededor de muchos datos tendran imputados estos valores gigantes los cuales no mostratan realmente los dato ya que los reales en esos valores NAs los mantiene asi
+
+
+## Caso de estudio del curso
+
+El caso de estudio del curso tratÃÂ³ de el mismo dataset del proyecto del anterior curso, lo unico a resaltar es que ellos analizan arboles de clusters y un svd con los 2 priemros vectores izquirdos donde el segundo vector msotrÃÂ³ una varaiciÃÂ³n que no se entendÃÂ­a claramente, por lo que se miro el segundo vector derecho y el valor mÃÂ¡ximo de ese vector y ese valro represtnaba una columna asi que con esa nueva columna se volvio a hacer el anÃÂ¡lisis y se veian mejores clusters.
+
+Despues se hablo del parametro `nstart` de la funciÃÂ³n kmeans, donde se dijo que si no se fijaba el a funciÃÂ³n ponia centros aleatoriamente pero nosotros lo podemos definir con ese parametro donde poner el centro inicial, y la idea es cambiar este parametro de manera que se estudie si se manteine o se llaga a las mismas agruoaciones asi se hagan mas centros o no.
+
+la otra cosa que se hace es comaprar mediante la funciÃÂ³n `table`, la agrupacion de los centros respecto el facotr de estudi o que es la actividad, y despues se "extrae" algun cluter y se grÃÂ¡fican sus centros para ver si esta en algunas columnas especificas del dataset
+
+### ilustracion del k means usado en el caso de estudio:
+
+```{r,cache=TRUE}
+set.seed(123456789)
+sis <- sis[,-c(1:5)]
+kclusters <- kmeans(sis ,centers=20,iter.max = 20)
+Datos2 <-read.table("predial.txt",sep=",",header = TRUE)
+Datos2 <- Datos2[complete.cases(Datos2),]
+Datos2 <- Datos2[1:length(kclusters$cluster),]
+table(kclusters$cluster,Datos2$NOMBRE_LOCALIDAD)
+```
+
+
+```{r,cache=TRUE}
+set.seed(123456789)
+kclusters2 <- kmeans(sis ,centers=20,nstart = 25,iter.max = 20)
+table(kclusters2$cluster,Datos2$NOMBRE_LOCALIDAD)
+```
+Fijece en los cÃÂ³digos anterioes como la agrupaciÃÂ³n cambia, aun asÃÂ­ el mismo patron se intenta mantener, por ejemplo la localidad de Sumapaz siempre se encintra en el grupo con suba, santa fe y demÃÂ¡s
+
+Ahoral a pregunta es cual de las variable o del tipo del predio o si es el monto, parcen atraer a alguna localidad a algun grupo especifico, por ejemplo, porque todas las clasificaciones de sumapaz siempre la atrae a este grupo que variable hace eso.
+
+Cabe resaltar que antes del analisis al objeto sis le elimino las primeras 5 varaibles que son codigos de la localidad y la fecha quedandome asi con solo caracteristicas de los predios
+
+```{r}
+plot(kclusters2$centers[16,1:8],pch=19,ylab="centros de cluster") #creemos que el clsuter 16 es la localidad de sumapaz
+sumapaz <- Datos2[Datos2$NOMBRE_LOCALIDAD=="SUMAPAZ",]
+which.max(sumapaz$TOTAL_PAGADO)
+sumapaz[52,"TOTAL_PAGADO"]
+
+```
+mirando el grÃÂ¡fico anterior, se obserfva que la columna que calramente define lo que caracteriza este grupo es el moto pagado, lo cual claramente va acaracterizar todos los demÃÂ¡s gripos, serÃÂ­a interesante eliminar esta columna para caracterizar por las otras, sin emabrgo se puede evaluar por el monto pagado, donde se ve que el centro promedio de esa agrupacion es un monto pagoado de unos 7 millones, lo cual podrÃÂ­a ahcernos clasificar que si un total pagado es de alrededor de los 7 millones ese podrÃÂ­a ser de sumapaz, sin embargo mirano el valor maximo de sumapaz este es de 4 millones, claramente no es exacto ya qeu aca estamos agruopando con valores de las otras localidades que son mayores, ya tocarai empezar a hace machine learning haciedno un grupo de testeo pasandole valroes pagados y mirar de cuantos realmente si son de sumapaz y eso...
+```{r}
+plot(kclusters2$centers[13,1:8],pch=19,ylab="centros de cluster")#creemos que 13 es san cristobal
+SanCristobal <- Datos2[Datos2$NOMBRE_LOCALIDAD=="SAN CRISTOBAL",]
+which.max(SanCristobal$TOTAL_PAGADO)
+SanCristobal[313,"TOTAL_PAGADO"]
+```
+
+
+### ilustraciÃ³n de la seleccion de columnas que aportan en el caso de estudio
+
+```{r}
+cols <- colorRampPalette(c("white","Green"))
+source("myplclust.R")
+Datos2 <-read.table("predial.txt",sep=",",header = TRUE)
+Datos2 <- Datos2[complete.cases(Datos2),]
+Datos2 <- Datos2[1:300,-c(1:7,9,17)]
+Datos2$ESTRATO <- Datos2$ESTRATO+1
+Datos2$ESTRATO <- as.factor(Datos2$ESTRATO) 
+intento1 <- dist(Datos2[,3:4])
+intento1clust <-hclust(intento1)
+myplclust(intento1clust,lab.col = unclass(Datos2$ESTRATO))
+#plot(0:6,col=1:7) #saber los colores
+```
+en el cÃ³digo anterior, se realiza un arbol, en el que se busca mirar grupos resepcto a los estratos, inicialmente elimino los NAs, seleeciono una muestra de 300 datos para hacerlo similar al ejemplo, y elimino todas las columnas excepto estrato y los todales de predios y no tengo en cuenta el valor de lso montos pagados ya que con lo mostrado anteriormente esta era la que mas caracterizaba los grupos.
+
+posteriormente agrego un 1 a la coluna de estrato ya que esta contaba con estrato 0, el cual para colorear R no pondria ningun color, por ello sumo 1 y los colores van del 1 al 7
+despues vuelvo facotr el estrato para psoteriormente traer su nivel como el color del arbol y aplico el arbol
+
+en el arbol no se ve claramente los grupos, respecto a la 3 y 4 columna que corresponden a total de predios obligados y no obligados, no se ve grupos generados claramente por estas dos columnas, solo se observa a los extremos como los colores azules osea los estratos 3 y 4 al sustraer el 1
+
+```{r}
+par(mfrow=c(1,2),oma=c(1,1,1,1))
+plot(Datos2[,3],col=Datos2$ESTRATO,pch=19,sub="predios obligados")
+legend("topleft",legend=(as.numeric(unique(Datos2$ESTRATO))-1),col=unique(Datos2$ESTRATO),pch=19)
+plot(Datos2[,4],col=Datos2$ESTRATO,pch=19,sub="predios no obligados")
+title("Estratos por obligacion de predio",outer = T)
+```
+
+en la anteiores grÃ¡ficas se busca obervar tal comporatamiento notece en la tercera columna que al parecer estos estratos azules tienen mayor valores de predios obligados, mientras que en la derecha, son mas los estratos de color 1 osea el estrato 0 al sustraer el 1
+
+Ahora lo que se hace es intentar agregar mas columnas para ver si otras definen mas o atraen mas a ciertos estratos
+
+```{r}
+par(mfrow=c(1,2),oma=c(1,1,1,1))
+plot(Datos2[,7],col=Datos2$ESTRATO,pch=19,sub="predios morosos")
+legend("topleft",legend=(as.numeric(unique(Datos2$ESTRATO))-1),col=unique(Datos2$ESTRATO),pch=19)
+plot(Datos2[,8],col=Datos2$ESTRATO,pch=19,sub="predios que no declaran")
+title("Estratos por intentcion de pago",outer = T)
+```
+fijece como ahora se se ven mas colores de tipo rojo en la parte de arriba 
+```{r}
+intento2 <- dist(Datos2[,7:8])
+intento2clust <-hclust(intento2)
+myplclust(intento2clust,lab.col = unclass(Datos2$ESTRATO))
+```
+fijece ahora como se observa cierta aglomeracion de verdes a la derecha y un poco menos de reaprticion de datos de color negro
+
+
+```{r}
+svd3 <- svd(scale(Datos2[,-1]))
+par(mfrow=c(1,3))
+plot(svd3$u[,1],col = Datos2$ESTRATO,pch=19)
+plot(svd3$u[,2],col = Datos2$ESTRATO,pch=19)
+plot(svd3$u[,4],col = Datos2$ESTRATO,pch=19)
+```
+fijece como el primer vector muestra el mismo comportamiento, aun asÃ­ fijece como el segundo vector de cierta foram separa unos de color rojo o estrato 1, y mirece como el 4 muestra como una mayor separacion entre azules claros y oscuros
+
+```{r}
+par(mfrow=c(1,2))
+plot(svd3$v[,2],pch=19)
+plot(svd3$v[,4],pch=19)
+maxCntrib2Vector <- which.max(svd3$v[,2])
+maxCntrib2Vector 
+maxCntrib4Vector <- which.max(svd3$v[,4])
+maxCntrib4Vector 
+```
+fijece en el cÃ³digo anterior como el mÃ¡ximo contribuidor es la columna 5 para el "patron" del segundo vector izquierdo, y el mÃ¡ximo contribuidor es la columna 4 para el cuarto vector
+
+```{r}
+intento3 <- dist(Datos2[,4:5])
+intento3clust <-hclust(intento3)
+myplclust(intento3clust,lab.col = unclass(Datos2$ESTRATO))
+```
+fijece como como con la grupacion de estas 2 se ven  kas datos de colores la izquierda y mas negros a la derecha, de cierta forma.
+
